@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+  <h3>My Blogs</h3>
+  <a class="btn btn-primary mb-3" href="{{ url_for('create_blog') }}">Create New</a>
+  {% for b in blogs %}
+    <div class="blog-card p-3">
+      <h4><a href="{{ url_for('blog_detail', blog_id=b.id) }}">{{ b.title }}</a></h4>
+      <div class="meta mb-2">Views: {{ b.views }} • Likes: <span id="likes-{{ b.id }}">{{ b.likes }}</span></div>
+      <p class="text-muted">{{ b.content[:200] }}{% if b.content|length > 200 %}...{% endif %}</p>
+      <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="{{ url_for('update_blog', blog_id=b.id) }}">Edit</a>
+        <form method="POST" action="{{ url_for('delete_blog', blog_id=b.id) }}" onsubmit="return confirm('Delete this blog?');">
+          <button class="btn btn-danger" type="submit">Delete</button>
+        </form>
+        <button class="btn" onclick="sendLike({{ b.id }}, this)">❤️ Like</button>
+      </div>
+    </div>
+  {% else %}
+    <p>No blogs yet. <a href="{{ url_for('create_blog') }}">Create one</a>.</p>
+  {% endfor %}
+{% endblock %}

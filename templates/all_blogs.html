@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  <h3>All Blogs</h3>
+  {% for b in blogs %}
+    <div class="blog-card p-3">
+      <h4><a href="{{ url_for('blog_detail', blog_id=b.id) }}">{{ b.title }}</a></h4>
+      <div class="meta mb-2">By {{ b.author.username }} • Views: {{ b.views }} • Likes: <span id="likes-{{ b.id }}">{{ b.likes }}</span></div>
+      <p class="text-muted">{{ b.content[:200] }}{% if b.content|length > 200 %}...{% endif %}</p>
+      <div>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('blog_detail', blog_id=b.id) }}">Read</a>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock %}

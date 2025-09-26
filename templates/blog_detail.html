@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-4 shadow-lg rounded-3 blog-detail">
+
+  {% if blog.image %}
+    <div class="text-center mb-3">
+      <img src="{{ url_for('static', filename='images/' ~ blog.image) }}" 
+           alt="Blog image" 
+           class="blog-detail-img">
+    </div>
+  {% endif %}
+
+  <h2 class="mb-2">{{ blog.title }}</h2>
+  <div class="meta mb-3 text-muted">
+    ✍️ By <strong>{{ blog.author.username }}</strong> 
+    • 🕒 {{ blog.created_at.strftime('%Y-%m-%d %H:%M') }}  
+    • 👁️ {{ blog.views }}  
+    • ❤️ <span id="likes-{{ blog.id }}">{{ blog.likes }}</span>
+  </div>
+
+  <div class="content mb-4">
+    <p style="white-space:pre-wrap;">{{ blog.content }}</p>
+  </div>
+
+  <div class="like-section mb-3">
+    {% if current_user.is_authenticated %}
+      <button class="btn btn-outline-danger like-btn" onclick="sendLike({{ blog.id }}, this)">
+        ❤️ Like
+      </button>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-primary">Login to like</a>
+    {% endif %}
+  </div>
+
+  <hr>
+
+  <h5 class="mt-3">💬 Comments ({{ comments|length }})</h5>
+
+  {% if current_user.is_authenticated %}
+    <form method="POST" class="mb-3">
+      {{ form.hidden_tag() }}
+      <div class="mb-2">
+        {{ form.text(class="form-control", placeholder="Write a comment...") }}
+      </div>
+      <button class="btn btn-primary">{{ form.submit.label }}</button>
+    </form>
+  {% else %}
+    <p><a href="{{ url_for('login') }}">Login</a> to post comments.</p>
+  {% endif %}
+
+  <div class="comments-list mt-3">
+    {% for c in comments %}
+      <div class="p-3 mb-2 comment-box">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <strong>{{ c.user.username }}</strong>
+          <small class="text-muted">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+        </div>
+        <p class="m-0">{{ c.text }}</p>
+      </div>
+    {% else %}
+      <p>No comments yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
