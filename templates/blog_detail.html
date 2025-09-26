@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card p-4 shadow-lg rounded-3 blog-detail">
+  
+{% if blog.image %}
+  <div class="text-center mb-3">
+    <img src="{{ url_for('static', filename='uploads/' ~ blog.image) }}" 
+         alt="Blog image" 
+         class="blog-detail-img" 
+         style="max-width:100%; max-height:400px; object-fit:cover;">
+  </div>
+{% endif %}
 
-  {% if blog.image %}
-    <div class="text-center mb-3">
-      <img src="{{ url_for('static', filename='images/' ~ blog.image) }}" 
-           alt="Blog image" 
-           class="blog-detail-img">
-    </div>
-  {% endif %}
 
   <h2 class="mb-2">{{ blog.title }}</h2>
   <div class="meta mb-3 text-muted">
