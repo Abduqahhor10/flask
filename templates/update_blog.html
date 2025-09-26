@@ -1,14 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
   <h3>{{ 'Create Blog' if create else 'Update Blog' }}</h3>
-  <form method="POST">
+  <form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
+
     <div class="mb-3">
       {{ form.title(class="form-control", placeholder="Title") }}
     </div>
+
     <div class="mb-3">
       {{ form.content(class="form-control", rows="10", placeholder="Write content...") }}
     </div>
+
+    <div class="mb-3">
+      {{ form.image.label }}
+      {{ form.image(class="form-control") }}
+    </div>
+
     <button class="btn btn-primary">{{ form.submit.label }}</button>
   </form>
 {% endblock %}

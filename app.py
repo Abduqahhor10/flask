@@ -4,10 +4,21 @@ from models import db, User, Blog, Comment
 from forms import RegisterForm, LoginForm, BlogForm, CommentForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# Rasm yuklash uchun sozlamalar
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# papkani yaratib qo'yish
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -20,6 +31,10 @@ with app.app_context():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# Faqat ruxsat berilgan fayl turini tekshiradi
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Home / All blogs
 @app.route('/')
@@ -71,16 +86,13 @@ def profile():
     return render_template('profile.html')
 
 # Create blog
-from werkzeug.utils import secure_filename
-import os
-
 @app.route('/create_blog', methods=['GET', 'POST'])
 @login_required
 def create_blog():
     form = BlogForm()
     if form.validate_on_submit():
         filename = None
-        if form.image.data:
+        if form.image.data and allowed_file(form.image.data.filename):
             filename = secure_filename(form.image.data.filename)
             form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -134,7 +146,6 @@ def blog_detail(blog_id):
 @login_required
 def like(blog_id):
     blog = Blog.query.get_or_404(blog_id)
-    # For simplicity we allow unlimited likes (not per-user). For per-user block, you'd add Like model.
     blog.likes = (blog.likes or 0) + 1
     db.session.commit()
     return jsonify({'likes': blog.likes})
@@ -150,6 +161,10 @@ def update_blog(blog_id):
     if form.validate_on_submit():
         blog.title = form.title.data
         blog.content = form.content.data
+        if form.image.data and allowed_file(form.image.data.filename):
+            filename = secure_filename(form.image.data.filename)
+            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            blog.image = filename
         db.session.commit()
         flash("Blog updated", "success")
         return redirect(url_for('my_blogs'))
@@ -177,5 +192,4 @@ def search():
     return render_template('index.html', blogs=blogs, query=q)
 
 if __name__ == '__main__':
-    # debug True for dev
-    app.run(debug=True, host='192.168.88.89')
+    app.run(debug=True, host='127.0.0.1', port=5000)

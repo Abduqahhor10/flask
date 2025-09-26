@@ -1,0 +1,23 @@
+@app.route('/create', methods=['GET', 'POST'])
+def create_blog():
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        
+        image = request.files['image']  # input name="image"
+        image_filename = None
+
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_filename = filename
+
+        # Endi rasm nomini ham bazaga saqlaysiz
+        new_blog = Blog(title=title, content=content, image=image_filename)
+        db.session.add(new_blog)
+        db.session.commit()
+
+        flash("Blog yaratildi!", "success")
+        return redirect(url_for('index'))
+
+    return render_template('create.html')
