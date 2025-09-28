@@ -12,13 +12,18 @@ app.config.from_object(Config)
 
 # Rasm yuklash uchun sozlamalar
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
+PROFILE_FOLDER = os.path.join(UPLOAD_FOLDER, 'profiles')
+BLOG_FOLDER = os.path.join(UPLOAD_FOLDER, 'blogs')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# papkani yaratib qo'yish
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# papkalarni yaratib qo‘yish
+for folder in [UPLOAD_FOLDER, PROFILE_FOLDER, BLOG_FOLDER]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PROFILE_FOLDER'] = PROFILE_FOLDER
+app.config['BLOG_FOLDER'] = BLOG_FOLDER
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -50,8 +55,19 @@ def register():
         if User.query.filter((User.email==form.email.data)|(User.username==form.username.data)).first():
             flash("User with that email or username already exists", "danger")
             return redirect(url_for('register'))
+        
+        filename = None
+        if form.profile_image.data and allowed_file(form.profile_image.data.filename):
+            filename = secure_filename(form.profile_image.data.filename)
+            form.profile_image.data.save(os.path.join(app.config['PROFILE_FOLDER'], filename))
+
         hashed = generate_password_hash(form.password.data)
-        u = User(username=form.username.data, email=form.email.data, password=hashed)
+        u = User(
+            username=form.username.data, 
+            email=form.email.data, 
+            password=hashed,
+            profile_image=filename  # modelga qo‘shgan bo‘lishingiz kerak
+        )
         db.session.add(u)
         db.session.commit()
         flash("Registered! Please log in.", "success")
@@ -94,7 +110,7 @@ def create_blog():
         filename = None
         if form.image.data and allowed_file(form.image.data.filename):
             filename = secure_filename(form.image.data.filename)
-            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            form.image.data.save(os.path.join(app.config['BLOG_FOLDER'], filename))
 
         new_blog = Blog(
             title=form.title.data,
@@ -163,7 +179,7 @@ def update_blog(blog_id):
         blog.content = form.content.data
         if form.image.data and allowed_file(form.image.data.filename):
             filename = secure_filename(form.image.data.filename)
-            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            form.image.data.save(os.path.join(app.config['BLOG_FOLDER'], filename))
             blog.image = filename
         db.session.commit()
         flash("Blog updated", "success")

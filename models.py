@@ -9,6 +9,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    profile_image = db.Column(db.String(150), nullable=True, default="default.png")  # yangi ustun
 
     blogs = db.relationship('Blog', backref='author', lazy=True)
     comments = db.relationship('Comment', backref='user', lazy=True)
@@ -18,7 +19,7 @@ class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    image = db.Column(db.String(150), nullable=True)  # Rasm nomi shu ustunda saqlanadi
+    image = db.Column(db.String(150), nullable=True)  # blog rasmlari shu yerda saqlanadi
     views = db.Column(db.Integer, default=0)
     likes = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

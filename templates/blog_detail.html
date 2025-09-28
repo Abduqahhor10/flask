@@ -2,15 +2,14 @@
 {% block content %}
 <div class="card p-4 shadow-lg rounded-3 blog-detail">
   
-{% if blog.image %}
-  <div class="text-center mb-3">
-    <img src="{{ url_for('static', filename='uploads/' ~ blog.image) }}" 
-         alt="Blog image" 
-         class="blog-detail-img" 
-         style="max-width:100%; max-height:400px; object-fit:cover;">
-  </div>
-{% endif %}
-
+  {% if blog.image %}
+    <div class="text-center mb-3">
+      <img src="{{ url_for('static', filename='uploads/' ~ blog.image) }}" 
+           alt="Blog image" 
+           class="blog-detail-img" 
+           style="max-width:100%; max-height:400px; object-fit:cover;">
+    </div>
+  {% endif %}
 
   <h2 class="mb-2">{{ blog.title }}</h2>
   <div class="meta mb-3 text-muted">
@@ -52,10 +51,18 @@
 
   <div class="comments-list mt-3">
     {% for c in comments %}
-      <div class="p-3 mb-2 comment-box">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          <strong>{{ c.user.username }}</strong>
-          <small class="text-muted">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+      <div class="p-3 mb-2 comment-box border rounded">
+        <div class="d-flex align-items-center mb-2">
+          <!-- User profile image -->
+          <img src="{{ url_for('static', filename='uploads/' ~ (c.user.profile_image or 'default.png')) }}"
+               alt="User image"
+               class="rounded-circle me-2"
+               width="40" height="40">
+
+          <div class="d-flex justify-content-between flex-grow-1">
+            <strong>{{ c.user.username }}</strong>
+            <small class="text-muted">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+          </div>
         </div>
         <p class="m-0">{{ c.text }}</p>
       </div>
